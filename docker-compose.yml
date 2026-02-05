@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  # PostgreSQL per Auth Service
+  auth-db:
+    image: postgres:15-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD: authpass
+    ports:
+      - "5432:5432"
+    networks:
+      - easystay-network
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+
+  # PostgreSQL per House Service
+  house-db:
+    image: postgres:15-alpine
+    container_name: house-db
+    environment:
+      POSTGRES_DB: housedb
+      POSTGRES_USER: houseuser
+      POSTGRES_PASSWORD: housepass
+    ports:
+      - "5433:5432"
+    networks:
+      - easystay-network
+    volumes:
+      - house-db-data:/var/lib/postgresql/data
+
+  # PostgreSQL per Booking Service
+  booking-db:
+    image: postgres:15-alpine
+    container_name: booking-db
+    environment:
+      POSTGRES_DB: bookingdb
+      POSTGRES_USER: bookinguser
+      POSTGRES_PASSWORD: bookingpass
+    ports:
+      - "5434:5432"
+    networks:
+      - easystay-network
+    volumes:
+      - booking-db-data:/var/lib/postgresql/data
+
+  # Auth Service
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
+      SPRING_DATASOURCE_USERNAME: authuser
+      SPRING_DATASOURCE_PASSWORD: authpass
+      JWT_SECRET: easystay-secret-key-2026-microservices-architecture-secure
+    depends_on:
+      - auth-db
+    networks:
+      - easystay-network
+
+  # House Service
+  house-service:
+    build: ./house-service
+    container_name: house-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://house-db:5432/housedb
+      SPRING_DATASOURCE_USERNAME: houseuser
+      SPRING_DATASOURCE_PASSWORD: housepass
+      JWT_SECRET: easystay-secret-key-2026-microservices-architecture-secure
+      AUTH_SERVICE_URL: http://auth-service:8081
+    depends_on:
+      - house-db
+    networks:
+      - easystay-network
+
+  # Booking Service
+  booking-service:
+    build: ./booking-service
+    container_name: booking-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://booking-db:5432/bookingdb
+      SPRING_DATASOURCE_USERNAME: bookinguser
+      SPRING_DATASOURCE_PASSWORD: bookingpass
+      JWT_SECRET: easystay-secret-key-2026-microservices-architecture-secure
+      AUTH_SERVICE_URL: http://auth-service:8081
+      HOUSE_SERVICE_URL: http://house-service:8082
+    depends_on:
+      - booking-db
+    networks:
+      - easystay-network
+
+  # API Gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:8081
+      HOUSE_SERVICE_URL: http://house-service:8082
+      BOOKING_SERVICE_URL: http://booking-service:8083
+      JWT_SECRET: easystay-secret-key-2026-microservices-architecture-secure
+    depends_on:
+      - auth-service
+      - house-service
+      - booking-service
+    networks:
+      - easystay-network
+
+networks:
+  easystay-network:
+    driver: bridge
+
+volumes:
+  auth-db-data:
+  house-db-data:
+  booking-db-data:

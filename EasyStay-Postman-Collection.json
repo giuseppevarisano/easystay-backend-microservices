@@ -1,0 +1,360 @@
+{
+  "info": {
+    "name": "EasyStay Microservices API",
+    "description": "Collection completa per testare le API di EasyStay",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "casa_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"admin_token\", jsonData.token);",
+                  "    console.log(\"Admin token saved:\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@easystay.com\",\n  \"password\": \"Admin123!\",\n  \"nome\": \"Admin User\",\n  \"ruolo\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register USER",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"user_token\", jsonData.token);",
+                  "    console.log(\"User token saved:\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@easystay.com\",\n  \"password\": \"User123!\",\n  \"nome\": \"Mario Rossi\",\n  \"ruolo\": \"USER\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"user_token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@easystay.com\",\n  \"password\": \"User123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Case Vacanza",
+      "item": [
+        {
+          "name": "Crea Casa Vacanza (ADMIN)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"casa_id\", jsonData.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Villa al Mare\",\n  \"descrizione\": \"Bellissima villa con vista mare e piscina privata\",\n  \"citta\": \"Roma\",\n  \"indirizzo\": \"Via Roma 123\",\n  \"prezzoPerNotte\": 150.00,\n  \"numeroStanze\": 3,\n  \"numeroPostiLetto\": 6\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/case-vacanza/crea",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "case-vacanza",
+                "crea"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cerca Case Disponibili",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/case-vacanza/disponibili?citta=Roma",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "case-vacanza",
+                "disponibili"
+              ],
+              "query": [
+                {
+                  "key": "citta",
+                  "value": "Roma"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Dettagli Casa Vacanza",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/case-vacanza/{{casa_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "case-vacanza",
+                "{{casa_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Case del Proprietario",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/case-vacanza/proprietario",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "case-vacanza",
+                "proprietario"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prenotazioni",
+      "item": [
+        {
+          "name": "Crea Prenotazione",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"casaVacanzaId\": {{casa_id}},\n  \"dataInizio\": \"2026-07-01\",\n  \"dataFine\": \"2026-07-07\",\n  \"numeroOspiti\": 4\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/prenotazioni/crea",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "prenotazioni",
+                "crea"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Prenotazioni Utente",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/prenotazioni/utente/2?page=0&size=10&sort=createdAt,desc",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "prenotazioni",
+                "utente",
+                "2"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "createdAt,desc"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
