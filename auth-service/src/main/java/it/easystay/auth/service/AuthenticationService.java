@@ -47,6 +47,7 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponseDTO authenticate(AuthenticationRequestDTO request) {
+        // AuthenticationManager will throw AuthenticationException if credentials are invalid
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email(),
@@ -54,6 +55,8 @@ public class AuthenticationService {
                 )
         );
 
+        // User should exist at this point since authentication succeeded
+        // This orElseThrow is a safeguard for data inconsistency scenarios
         var utente = utenteRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 

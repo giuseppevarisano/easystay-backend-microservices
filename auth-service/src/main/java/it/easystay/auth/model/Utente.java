@@ -48,6 +48,10 @@ public class Utente implements UserDetails {
         return email;
     }
 
+    // NOTE: Account status management (expiration, locking, credential expiration, enable/disable)
+    // is not implemented in this version. All accounts are considered active by default.
+    // Future enhancement: Add fields like 'enabled', 'accountNonLocked', etc. to support these features.
+    
     @Override
     public boolean isAccountNonExpired() {
         return true;
