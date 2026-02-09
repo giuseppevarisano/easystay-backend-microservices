@@ -6,17 +6,21 @@ import com.easystay.auth.dto.RegisterRequest;
 import com.easystay.auth.model.Utente;
 import com.easystay.auth.repository.UtenteRepository;
 import com.easystay.auth.security.JwtUtil;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
     private final UtenteRepository utenteRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+
+    public AuthService(UtenteRepository utenteRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+        this.utenteRepository = utenteRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
 
     public AuthResponse register(RegisterRequest request) {
         if (utenteRepository.existsByEmail(request.getEmail())) {

@@ -1,11 +1,7 @@
 package com.easystay.auth.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
-@Data
-@AllArgsConstructor
 @Schema(description = "Risposta di autenticazione con JWT token")
 public class AuthResponse {
 
@@ -23,4 +19,55 @@ public class AuthResponse {
 
     @Schema(description = "Ruolo dell'utente", example = "USER")
     private String ruolo;
+
+    public AuthResponse() {
+    }
+
+    public AuthResponse(String token, Long userId, String email, String nome, String ruolo) {
+        this.token = token;
+        this.userId = userId;
+        this.email = email;
+        this.nome = nome;
+        this.ruolo = ruolo;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getRuolo() {
+        return ruolo;
+    }
+
+    public void setRuolo(String ruolo) {
+        this.ruolo = ruolo;
+    }
 }
