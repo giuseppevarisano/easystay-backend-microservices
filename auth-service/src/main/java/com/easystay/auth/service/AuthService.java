@@ -3,6 +3,8 @@ package com.easystay.auth.service;
 import com.easystay.auth.dto.AuthResponse;
 import com.easystay.auth.dto.LoginRequest;
 import com.easystay.auth.dto.RegisterRequest;
+import com.easystay.auth.exception.BadCredentialsException;
+import com.easystay.auth.exception.EmailAlreadyExistsException;
 import com.easystay.auth.model.Utente;
 import com.easystay.auth.repository.UtenteRepository;
 import com.easystay.auth.security.JwtUtil;
@@ -24,7 +26,7 @@ public class AuthService {
 
     public AuthResponse register(RegisterRequest request) {
         if (utenteRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email già registrata");
+            throw new EmailAlreadyExistsException();
         }
 
         Utente utente = new Utente();
@@ -52,10 +54,10 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         Utente utente = utenteRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Credenziali non valide"));
+                .orElseThrow(() -> new BadCredentialsException());
 
         if (!passwordEncoder.matches(request.getPassword(), utente.getPassword())) {
-            throw new RuntimeException("Credenziali non valide");
+            throw new BadCredentialsException();
         }
 
         String token = jwtUtil.generateToken(
