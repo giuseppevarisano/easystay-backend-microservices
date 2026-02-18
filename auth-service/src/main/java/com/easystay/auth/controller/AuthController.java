@@ -3,6 +3,7 @@ package com.easystay.auth.controller;
 import com.easystay.auth.dto.AuthResponse;
 import com.easystay.auth.dto.LoginRequest;
 import com.easystay.auth.dto.RegisterRequest;
+import com.easystay.auth.dto.UtenteDettaglioResponse;
 import com.easystay.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -50,5 +52,11 @@ public class AuthController {
         }
         boolean isValid = authService.validateToken(token);
         return ResponseEntity.ok(isValid);
+    }
+
+    @GetMapping("/utenti/{utenteId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UtenteDettaglioResponse> getUtenteDettaglio(@PathVariable Long utenteId) {
+        return ResponseEntity.ok(authService.getUtenteDettaglioById(utenteId));
     }
 }

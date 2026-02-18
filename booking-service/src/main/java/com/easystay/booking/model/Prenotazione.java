@@ -10,7 +10,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "prenotazioni")
+@Table(
+    name = "prenotazioni",
+    indexes = {
+        @Index(name = "idx_prenotazioni_utente", columnList = "utente_id"),
+        @Index(name = "idx_prenotazioni_casa", columnList = "casa_vacanza_id")
+    }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

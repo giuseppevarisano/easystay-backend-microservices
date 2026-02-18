@@ -1,9 +1,13 @@
 package com.easystay.booking.service;
 
+import com.easystay.booking.client.AuthServiceClient;
 import com.easystay.booking.client.HouseServiceClient;
 import com.easystay.booking.dto.CasaVacanzaDTO;
+import com.easystay.booking.dto.PrenotazioneConUtenteResponse;
+import com.easystay.booking.dto.PrenotazioniCasaDettaglioResponse;
 import com.easystay.booking.dto.PrenotazioneRequest;
 import com.easystay.booking.dto.PrenotazioneResponse;
+import com.easystay.booking.dto.UtenteDettaglioDTO;
 import com.easystay.booking.model.Prenotazione;
 import com.easystay.booking.repository.PrenotazioneRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,7 @@ public class BookingService {
 
     private final PrenotazioneRepository prenotazioneRepository;
     private final HouseServiceClient houseServiceClient;
+    private final AuthServiceClient authServiceClient;
 
     public PrenotazioneResponse creaPrenotazione(PrenotazioneRequest request, Long utenteId, String token) {
         // Validazione date
@@ -72,6 +77,20 @@ public class BookingService {
     public Page<PrenotazioneResponse> trovaPrenotazioniUtente(Long utenteId, Pageable pageable) {
         return prenotazioneRepository.findByUtenteId(utenteId, pageable)
                 .map(this::toResponse);
+    }
+
+    public PrenotazioniCasaDettaglioResponse trovaPrenotazioniPerCasa(Long casaId, String token) {
+        CasaVacanzaDTO casa = houseServiceClient.getCasaVacanzaById(casaId, token);
+
+        List<PrenotazioneConUtenteResponse> prenotazioniArricchite = prenotazioneRepository.findByCasaVacanzaId(casaId)
+                .stream()
+                .map(prenotazione -> {
+                    UtenteDettaglioDTO utente = authServiceClient.getUtenteById(prenotazione.getUtenteId(), token);
+                    return new PrenotazioneConUtenteResponse(toResponse(prenotazione), utente);
+                })
+                .toList();
+
+        return new PrenotazioniCasaDettaglioResponse(casa, prenotazioniArricchite);
     }
 
     private PrenotazioneResponse toResponse(Prenotazione prenotazione) {
