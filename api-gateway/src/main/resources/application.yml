@@ -31,6 +31,28 @@ spring:
           filters:
             - StripPrefix=0
 
+        # OpenAPI Docs Routes
+        - id: auth-service-docs
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/docs/auth
+          filters:
+            - SetPath=/api-docs
+
+        - id: house-service-docs
+          uri: ${HOUSE_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/docs/house
+          filters:
+            - SetPath=/api-docs
+
+        - id: booking-service-docs
+          uri: ${BOOKING_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/docs/booking
+          filters:
+            - SetPath=/api-docs
+
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -52,3 +74,14 @@ logging:
   level:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: auth-service
+        url: /docs/auth
+      - name: house-service
+        url: /docs/house
+      - name: booking-service
+        url: /docs/booking

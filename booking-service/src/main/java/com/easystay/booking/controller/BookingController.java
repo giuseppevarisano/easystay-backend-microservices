@@ -2,6 +2,8 @@ package com.easystay.booking.controller;
 
 import com.easystay.booking.dto.PrenotazioneRequest;
 import com.easystay.booking.dto.PrenotazioneResponse;
+import com.easystay.booking.dto.PrenotazioniCasaDettaglioResponse;
+import com.easystay.booking.security.JwtUtil;
 import com.easystay.booking.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final JwtUtil jwtUtil;
 
     @Operation(
             summary = "Crea una nuova prenotazione",
@@ -62,12 +65,23 @@ public class BookingController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt,desc") String[] sort,
-            HttpServletRequest httpRequest) {
+            HttpServletRequest httpRequest,
+            @RequestHeader("Authorization") String authorizationHeader) {
 
-        Long authenticatedUserId = (Long) httpRequest.getAttribute("userId");
+        String token = authorizationHeader.startsWith("Bearer ")
+                ? authorizationHeader.substring(7)
+                : authorizationHeader;
+
+        Object requestUserId = httpRequest.getAttribute("userId");
+        Long authenticatedUserId;
+        if (requestUserId instanceof Number number) {
+            authenticatedUserId = number.longValue();
+        } else {
+            authenticatedUserId = jwtUtil.extractUserId(token);
+        }
         
         // Solo l'utente stesso può vedere le proprie prenotazioni
-        if (!authenticatedUserId.equals(utenteId)) {
+        if (authenticatedUserId == null || !authenticatedUserId.equals(utenteId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -76,5 +90,27 @@ public class BookingController {
 
         Page<PrenotazioneResponse> prenotazioni = bookingService.trovaPrenotazioniUtente(utenteId, pageable);
         return ResponseEntity.ok(prenotazioni);
+    }
+
+    @Operation(
+            summary = "Recupera prenotazioni per casa vacanza (solo ADMIN)",
+            description = "Restituisce dettagli casa, prenotazioni associate e dettagli utenti prenotanti."
+    )
+    @GetMapping("/{casaId}")
+    public ResponseEntity<PrenotazioniCasaDettaglioResponse> trovaPrenotazioniPerCasa(
+            @PathVariable Long casaId,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        String token = authorizationHeader.startsWith("Bearer ")
+                ? authorizationHeader.substring(7)
+                : authorizationHeader;
+
+        String ruolo = jwtUtil.extractRuolo(token);
+        if (!"ADMIN".equalsIgnoreCase(ruolo)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        PrenotazioniCasaDettaglioResponse response = bookingService.trovaPrenotazioniPerCasa(casaId, token);
+        return ResponseEntity.ok(response);
     }
 }

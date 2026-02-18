@@ -3,6 +3,7 @@ package com.easystay.auth.service;
 import com.easystay.auth.dto.AuthResponse;
 import com.easystay.auth.dto.LoginRequest;
 import com.easystay.auth.dto.RegisterRequest;
+import com.easystay.auth.dto.UtenteDettaglioResponse;
 import com.easystay.auth.exception.BadCredentialsException;
 import com.easystay.auth.exception.EmailAlreadyExistsException;
 import com.easystay.auth.model.Utente;
@@ -77,5 +78,18 @@ public class AuthService {
 
     public boolean validateToken(String token) {
         return jwtUtil.validateToken(token);
+    }
+
+    public UtenteDettaglioResponse getUtenteDettaglioById(Long utenteId) {
+        Utente utente = utenteRepository.findById(utenteId)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        return new UtenteDettaglioResponse(
+                utente.getId(),
+                utente.getEmail(),
+                utente.getNome(),
+                utente.getRuolo().name(),
+                utente.getCreatedAt()
+        );
     }
 }
