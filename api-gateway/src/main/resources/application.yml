@@ -21,7 +21,9 @@ spring:
           predicates:
             - Path=/api/case-vacanza/**
           filters:
+            - JwtAuthenticationFilter
             - StripPrefix=0
+
 
         # Booking Service Routes
         - id: booking-service
@@ -29,6 +31,7 @@ spring:
           predicates:
             - Path=/api/prenotazioni/**
           filters:
+            - JwtAuthenticationFilter
             - StripPrefix=0
 
         # OpenAPI Docs Routes
